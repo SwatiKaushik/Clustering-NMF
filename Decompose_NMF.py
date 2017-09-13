@@ -10,11 +10,11 @@ import os
 import pandas as pd
 import seaborn as sns
 from sklearn.decomposition import NMF
-
+from scipy.stats import zscore
 
 def dfConcatenate(table, annotation):
     """
-     This function concatenates two dataframes
+    This function concatenates two dataframes
     :param table: input gene expression matrix, pandas dataframe, (n_features, m_samples)
     :param annotation: sample annotation file, (n_annotation, m_samples)
     :return concatenated dataframe
@@ -25,6 +25,18 @@ def dfConcatenate(table, annotation):
     concat = pd.concat([table,annotation])
     return concat
 
+def Calczscore(filename):
+    """
+    This function calculates the Z score of the dataframe
+    :param filename: pandas dataframe
+    :return z scored dataframe
+    """
+    
+    filenamet= filename.transpose()
+    filenamezscore = filenamet.apply(zscore)
+    out = filenamezscore.transpose()
+    return out
+    
 def plotheatmap(filename, k, annotation):
 
 	"""
@@ -47,9 +59,10 @@ def plotheatmap(filename, k, annotation):
 	#generate heatmap
 	annotation = merged.drop(['annotation'])
 	annotation = annotation.astype(float)
+	out = Calczscore(annotation)
 	lut = dict(zip(names.unique(), "rbg"))
 	col_colors = pd.Series(names, name='clusters').map(lut)
-	sns.plot = sns.clustermap(annotation, cmap="coolwarm", col_colors= col_colors, robust=True)
+	sns.plot = sns.clustermap(out, cmap="coolwarm", col_colors= col_colors, robust=True)
 
 	#save heatmap
 	outplot = filename + ".png"
